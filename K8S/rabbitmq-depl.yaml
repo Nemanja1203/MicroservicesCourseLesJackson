@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-depl
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: rabbitmq # 1. Should be the same
+  template:
+    metadata:
+      labels:
+        app: rabbitmq # 1. Should be the same
+    spec:
+      containers:
+        - name: rabbitmq # 1. Should be the same
+          image: rabbitmq:3-management # This is image with management interface (so we can see messages appearing on dashboard)
+          ports:
+            - containerPort: 15672 # Management port
+              name: rbmq-mgmt-port
+            - containerPort: 5672
+              name: rbmq-msg-port
+---
+# Cluster IP Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: rabbitmq
+  ports:
+  - name: rbmq-mgmt-port
+    protocol: TCP
+    port: 15672
+    targetPort: 15672
+  - name: rbmq-msg-port
+    protocol: TCP
+    port: 5672
+    targetPort: 5672
+---
+# LoadBalancer Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-loadbalancer-srv
+spec:
+  type: LoadBalancer
+  selector:
+    app: rabbitmq
+  ports:
+  - name: rbmq-mgmt-port
+    protocol: TCP
+    port: 15672
+    targetPort: 15672
+  - name: rbmq-msg-port
+    protocol: TCP
+    port: 5672
+    targetPort: 5672
