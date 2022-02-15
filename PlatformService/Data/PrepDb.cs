@@ -15,7 +15,8 @@ namespace PlatformService.Data
         {
             // CHECK: (nm) Resolving for service...
             using var serviceScope = app.ApplicationServices.CreateScope();
-            SeedData(serviceScope.ServiceProvider.GetService<AppDbContext>(), isProd);
+            var dbContext = serviceScope.ServiceProvider.GetService<AppDbContext>();
+            SeedData(dbContext, isProd);
         }
 
         private static void SeedData(AppDbContext context, bool isProd)
